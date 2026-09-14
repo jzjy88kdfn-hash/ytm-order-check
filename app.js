@@ -1,5 +1,51 @@
 (() => {
   'use strict';
+  const ACCESS_HASH = 'ed946f65d2c785d90e827c5ffd879ce3b49c68d4c88013074176a7e73bc58bcf';
+  const ACCESS_STORAGE_KEY = 'ytm_access_until';
+  const ACCESS_DAYS = 30;
+  const gate = document.getElementById('accessGate');
+  const accessForm = document.getElementById('accessForm');
+  const accessPassword = document.getElementById('accessPassword');
+  const accessError = document.getElementById('accessError');
+
+  function unlock() {
+    document.body.classList.remove('access-locked');
+    gate.hidden = true;
+  }
+
+  async function sha256(value) {
+    const bytes = new TextEncoder().encode(value);
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+
+  const accessUntil = Number(localStorage.getItem(ACCESS_STORAGE_KEY));
+  if (accessUntil > Date.now()) {
+    unlock();
+  } else {
+    localStorage.removeItem(ACCESS_STORAGE_KEY);
+    requestAnimationFrame(() => accessPassword.focus());
+  }
+
+  accessForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    accessError.textContent = '';
+    const submittedHash = await sha256(accessPassword.value);
+    if (submittedHash === ACCESS_HASH) {
+      localStorage.setItem(ACCESS_STORAGE_KEY, String(Date.now() + ACCESS_DAYS * 24 * 60 * 60 * 1000));
+      accessPassword.value = '';
+      unlock();
+      return;
+    }
+    accessPassword.value = '';
+    accessError.textContent = 'パスワードが違います';
+    const panel = accessForm;
+    panel.classList.remove('shake');
+    void panel.offsetWidth;
+    panel.classList.add('shake');
+    accessPassword.focus();
+  });
+
   const TAX_RATE = 10;
   const MIN_RATE = 50;
   const MAX_RATE = 100;
