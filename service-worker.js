@@ -1,7 +1,7 @@
-const CACHE = 'ytm-order-check-v1.0.1';
+const CACHE = 'ytm-order-check-v1.0.2';
 const CORE = [
   './', './index.html', './styles.css', './app.js', './manifest.webmanifest',
-  './apple-touch-icon.png?v=2', './icon-192.png?v=2', './icon-512.png?v=2'
+  './apple-touch-icon.png?v=3', './icon-192.png?v=3', './icon-512.png?v=3'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)));
